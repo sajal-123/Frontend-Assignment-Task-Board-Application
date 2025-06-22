@@ -1,23 +1,46 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/user.store';
+import { Menu } from 'lucide-react';
+import { useMenuStore } from '../store/menu.store';
 
 function Navbar() {
   const navigate = useNavigate();
   const { user } = useUserStore();
+  const { isOpen, setIsOpen } = useMenuStore(); // Assuming you have a menu store for mobile sidebar
+  const isMobile = window.innerWidth < 1024; // Adjust based on your breakpoint
 
   const loggedIn = !!user;
 
   return (
     <header className="bg-white dark:bg-gray-900 px-6 py-4 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {!isOpen && isMobile && (
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-2 rounded absolute top-6 left-4 z-[101] hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+          >
+            <Menu className="w-6 h-6 text-black dark:text-white" />
+          </button>
+        )}
         {/* Brand */}
         <h1
-          className="text-2xl font-bold text-blue-600 dark:text-blue-400 cursor-pointer tracking-wide hover:opacity-90 transition"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
+          className="
+    mt-2 ml-10 font-bold text-3xl cursor-pointer tracking-wide
+    text-transparent bg-clip-text
+    bg-gradient-to-r from-blue-600 via-white to-blue-600
+    animate-[shimmer_3s_linear_infinite]
+  "
+          style={{
+            textShadow:
+              "1px 1px 0px rgba(0,0,0,0.25), 2px 2px 0px rgba(0,0,0,0.25), 3px 3px 5px rgba(0,0,0,0.15)",
+            backgroundSize: "200% 100%",
+          }}
         >
           TaskBoard
         </h1>
+
 
         {/* Auth/User Actions */}
         <AnimatePresence mode="wait">

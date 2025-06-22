@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLoginUser, useSignupUser } from "../hooks/user.queries";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import { showError, showSuccess } from "../utils/ToastUtils";
 
 interface AuthFormProps {
   mode: "login" | "signup";
@@ -39,10 +40,10 @@ const loginSchema = z.object({
   password: z
     .string({ required_error: "Password is required" })
     .min(6, "Password must be at least 6 characters")
-    // .regex(/[A-Z]/, "Must contain at least one uppercase letter")
-    // .regex(/[a-z]/, "Must contain at least one lowercase letter")
-    // .regex(/[0-9]/, "Must contain at least one number")
-    // .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
+  // .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+  // .regex(/[a-z]/, "Must contain at least one lowercase letter")
+  // .regex(/[0-9]/, "Must contain at least one number")
+  // .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
 });
 
 const signupSchema = loginSchema.extend({
@@ -51,7 +52,7 @@ const signupSchema = loginSchema.extend({
     .min(4, "Username must be at least 4 characters"),
 });
 
-const AuthForm = ({ mode,setUser }: AuthFormProps) => {
+const AuthForm = ({ mode, setUser }: AuthFormProps) => {
   const [formData, setFormData] = useState({ email: "", password: "", username: "" });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
@@ -98,15 +99,24 @@ const AuthForm = ({ mode,setUser }: AuthFormProps) => {
       loginMutation.mutate({ email, password }, {
         onSuccess: (data) => {
           setUser(data.user)
-          navigate("/",{ replace: true }); // ✅ Correct way
+          showSuccess("Login successful!");
+          navigate("/", { replace: true }); // ✅ Correct way
         },
-      });
+        onError: (error:any) => {
+          showError(error.response?.data.message || "Login failed. Please try again.");
+        }
+      },
+      );
     } else {
       signupMutation.mutate({ username, email, password },
         {
           onSuccess: () => {
-            navigate("/",{ replace: true }); // ✅ Correct way
+            showSuccess("Signup successful! Please log in.");
+            navigate("/auth?mode=login", { replace: true });
           },
+          onError: (error:any) => {
+            showError(error.response?.data.message || "Signup failed. Please try again.");
+          }
         }
       );
     }
@@ -172,8 +182,8 @@ const AuthForm = ({ mode,setUser }: AuthFormProps) => {
           onClick={handleSubmit}
           disabled={isPending}
           className={`w-full py-2 rounded-md transition-all duration-300 shadow-md text-white flex items-center justify-center ${isPending
-              ? "bg-blue-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
+            ? "bg-blue-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
             }`}
         >
           {isPending ? <Spinner /> : <span className="transition-opacity duration-200">{mode === "login" ? "Login" : "Sign Up"}</span>}

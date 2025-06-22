@@ -6,114 +6,127 @@ import {
     useSensors,
     type DragEndEvent,
 } from '@dnd-kit/core';
-import {
-    SortableContext,
-    arrayMove,
-    rectSortingStrategy,
-} from '@dnd-kit/sortable';
-import { useNavigate } from 'react-router-dom';
+import { SortableContext, arrayMove, rectSortingStrategy } from '@dnd-kit/sortable';
+import ColumnofTask from '../components/Column';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import ColumnForm from '../components/ColumnForm';
 import TaskForm from '../components/taskForm';
 import Modal from '../components/ui/Modal';
-import ColumnofTask from '../components/Column';
-import type { Column, Task } from '../@types';
-import { useFetchTasks, useCreateTask, useCreateColumn } from '../hooks/task.queries';
+import type { Column } from '../@types';
+import {
+    useCreateTask,
+    useCreateColumn,
+    useFetchColumns,
+} from '../hooks/task.queries';
+import { useUserStore } from '../store/user.store';
+import { showError } from '../utils/ToastUtils';
 
 const BoardDetail: React.FC = () => {
+    const { id: boardId } = useParams(); // <-- ✅ Get boardId from URL
+
+    const { user } = useUserStore();
     const [columns, setColumns] = useState<Column[]>([]);
     const [showForm, setShowForm] = useState(false);
     const [selectedColumnId, setSelectedColumnId] = useState<null | string>(null);
 
-    const { data: tasks, isSuccess } = useFetchTasks();
+    const fetchColumnMutation = useFetchColumns();
     const createTaskMutation = useCreateTask();
     const createColumnMutation = useCreateColumn();
-
     const navigate = useNavigate();
     const sensors = useSensors(useSensor(PointerSensor));
 
-    // Map tasks into columns
     useEffect(() => {
-        if (isSuccess && tasks) {
-            const columnMap: Record<string, Column> = {};
+        if (!boardId) return;
 
-            tasks.forEach((task: Task) => {
-                if (!columnMap[task.columnId]) {
-                    columnMap[task.columnId] = {
-                        id: task.columnId,
-                        title: 'Untitled Column',
-                        tasks: [],
-                    };
-                }
-                columnMap[task.columnId].tasks.push(task);
-            });
-
-            setColumns(Object.values(columnMap));
-        }
-    }, [isSuccess, tasks]);
-
-    // EventSource for real-time updates
-    useEffect(() => {
-        const eventSource = new EventSource('http://localhost:3000/events');
-        eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'taskUpdated') {
-                setColumns((prev) =>
-                    prev.map((col) => ({
-                        ...col,
-                        tasks: col.tasks.map((t) =>
-                            t.id === data.task.id ? data.task : t
-                        ),
-                    }))
-                );
-            }
-        };
-        return () => eventSource.close();
+        fetchColumnMutation.mutate(boardId, {
+            onSuccess: (data) => {
+                console.log('✅ Columns fetched successfully:', data.data);
+                setColumns(data.data);
+            },
+            onError: (error) => {
+                console.error('❌ Error fetching columns:', error);
+            },
+        });
     }, []);
+
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (!over || active.id === over.id) return;
 
-        const activeIdx = columns.findIndex((col) => col.id === active.id);
-        const overIdx = columns.findIndex((col) => col.id === over.id);
+        const oldIndex = columns.findIndex((col) => col._id === active.id);
+        const newIndex = columns.findIndex((col) => col._id === over.id);
 
-        if (activeIdx !== -1 && overIdx !== -1) {
-            const reordered = arrayMove(columns, activeIdx, overIdx);
-            setColumns(reordered);
+        if (oldIndex !== -1 && newIndex !== -1) {
+            const newColumns = arrayMove(columns, oldIndex, newIndex);
+            setColumns(newColumns);
         }
     };
 
     const handleAddTask = ({
-        columnId,
-        title,
-        description,
+        columnId, title, description, dueDate, priority, order, assignedTo,
     }: {
         columnId: string;
         title: string;
         description: string;
+        dueDate: string;
+        priority: string;
+        order: number;
+        assignedTo: string,
     }) => {
+        console.log('Adding task with params:', { columnId, title, description, dueDate, priority, order, assignedTo });
+
         createTaskMutation.mutate({
             title,
             description,
             columnId,
-            assignedTo: 'You',
-            createdBy: 'You',
-            dueDate: 'N/A',
-            priority: 'medium',
+            assignedTo: [assignedTo],
+            createdBy: user?._id,
+            dueDate: dueDate,
+            priority,
+            order
+        }, {
+            onSuccess: (data) => {
+                console.log('✅ Task created successfully:', data);
+                setColumns((prev) =>
+                    prev.map((col) =>
+                        col._id === columnId ? { ...col, tasks: [...col.tasks, data.data] } : col
+                    )
+                );
+            },
+            onError: (error) => {
+                showError(`Error creating task ${error.message}`);
+            },
         });
         setSelectedColumnId(null);
     };
 
-    const handleAddColumn = (title: string) => {
-        createColumnMutation.mutate({ title });
+    const handleAddColumn = (title: string, description: string) => {
+        if (!boardId) return;
+        console.log('Creating column with title:', title, description, 'for boardId:', boardId);
+
+        createColumnMutation.mutate(
+            { boardId, payload: { title, description, boardId } }, // 👈 wrap both
+            {
+                onSuccess: (data) => {
+                    console.log('✅ Column created successfully:', data);
+                    setColumns((prev) => [...prev, data.data]);
+                },
+                onError: (error) => {
+                    console.error('❌ Error creating column:', error);
+                },
+            }
+        );
+
         setShowForm(false);
     };
 
+
     return (
-        <div className="p-6 bg-gradient-to-br from-gray-100 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900  transition-colors duration-300">
+        <div className="p-6 bg-gradient-to-br from-gray-100 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
@@ -132,22 +145,26 @@ const BoardDetail: React.FC = () => {
                 </div>
 
                 <div className="flex gap-3">
-                    <Button onClick={() => setShowForm(true)} className="btn btn-primary text-sm shadow-md">
+                    <Button
+                        onClick={() => setShowForm(true)}
+                    >
                         + Create Column
                     </Button>
                 </div>
+
             </div>
 
             {/* DnD Columns */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={columns.map((col) => col.id)} strategy={rectSortingStrategy}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6">
+                <SortableContext items={columns.map((col) => col._id)} strategy={rectSortingStrategy}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
                         {columns.map((col) => (
-                            <ColumnofTask key={col.id} col={col} setSelectedColumnId={setSelectedColumnId} />
+                            <ColumnofTask key={col._id} col={col} setSelectedColumnId={setSelectedColumnId} />
                         ))}
                     </div>
                 </SortableContext>
             </DndContext>
+
 
             {/* Task Modal */}
             {selectedColumnId != null && (
@@ -156,7 +173,6 @@ const BoardDetail: React.FC = () => {
                         columnId={selectedColumnId}
                         onAdd={handleAddTask}
                         onClose={() => setSelectedColumnId(null)}
-                        users={['Alice', 'Bob', 'Charlie']} // Replace with actual user list
                     />
                 </Modal>
             )}
@@ -164,7 +180,11 @@ const BoardDetail: React.FC = () => {
             {/* Column Modal */}
             {showForm && (
                 <Modal onClose={() => setShowForm(false)}>
-                    <ColumnForm onAdd={handleAddColumn} showForm={showForm} setShowForm={setShowForm} />
+                    <ColumnForm
+                        onAdd={handleAddColumn}
+                        showForm={showForm}
+                        setShowForm={setShowForm}
+                    />
                 </Modal>
             )}
         </div>

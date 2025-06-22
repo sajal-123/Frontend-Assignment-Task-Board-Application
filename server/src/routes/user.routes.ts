@@ -5,7 +5,8 @@ import {
   registerUser,
   refreshAccessToken,
   getCurrentUser,
-  updateAccountdetails, // Ensure this is defined and exported from the controller
+  updateAccountdetails, 
+  getAllUser
 } from "../controllers/user.controller";
 import { upload } from "../middlewares/multer.middleware";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -24,6 +25,7 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/get-all-users").get( getAllUser);
 router.route("/update-account").patch(verifyJWT, updateAccountdetails);
 
 export default router;

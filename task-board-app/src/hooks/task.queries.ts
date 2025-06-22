@@ -1,44 +1,38 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import {
-  fetchTasks,
+  createBoard,
+  fetchBoards,
+  deleteBoard,
+  createColumn,
+  fetchColumns,
   createTask,
+  fetchTasks,
   updateTask,
-  createColumn
 } from '../services/task.service';
 
+// Boards
+export const useCreateBoard = () =>
+  useMutation({ mutationFn: createBoard });
+
+export const useFetchBoards = () =>
+  useMutation({ mutationFn: fetchBoards });
+
+export const useDeleteBoard = () =>
+  useMutation({ mutationFn: deleteBoard });
+
+// Columns
+export const useCreateColumn = () =>
+  useMutation({ mutationFn: createColumn });
+
+export const useFetchColumns = () =>
+  useMutation({ mutationFn: fetchColumns });
+
+// Tasks
+export const useCreateTask = () =>
+  useMutation({ mutationFn: createTask });
+
 export const useFetchTasks = () =>
-  useQuery({
-    queryKey: ['tasks'],
-    queryFn: fetchTasks,
-  });
+  useMutation({ mutationFn: fetchTasks });
 
-export const useCreateTask = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: createTask,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
-};
-
-export const useUpdateTask = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: updateTask,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tasks'] });
-    },
-  });
-};
-
-
-export const  useCreateColumn = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: createColumn,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['columns'] });
-    },
-  });
-}
+export const useUpdateTask = () =>
+  useMutation({ mutationFn: updateTask });

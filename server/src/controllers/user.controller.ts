@@ -69,6 +69,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ $or: [{ email }] });
   if (!user) {
+    console.error('User not found:', email);
     return res.status(404).json(new ApiResponse(404, null, "User does not exist"));
   }
 
@@ -208,11 +209,20 @@ const updateAccountdetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
+
+const getAllUser = asyncHandler(async (req, res) => {
+  const users = await User.find().select("-password -refreshToken");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, users, "All users fetched successfully"));
+});
+
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   getCurrentUser,
-  updateAccountdetails
+  updateAccountdetails,
+  getAllUser
 };

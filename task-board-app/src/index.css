@@ -171,3 +171,22 @@ p {
 .disabled {
   @apply opacity-50 cursor-not-allowed;
 }
+
+
+@keyframes shine {
+  from {
+    background-position: -200%;
+  }
+  to {
+    background-position: 200%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}

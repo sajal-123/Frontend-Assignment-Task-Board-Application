@@ -2,26 +2,25 @@
 export type Priority = 'high' | 'medium' | 'low';
 
 export interface Task {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   createdBy: string;
   assignedTo: string;
   dueDate: string;
   priority: Priority;
-  columnId:string;
+  columnId?:string;
 }
 
 export interface Column {
-  id: string;
+  _id: string;
   title: string;
+  description: string;
   tasks: Task[];
 }
 
 export interface Board {
-  id: string;
+  _id: string;
   name: string;
-  description: string;
-  columns: Column[];
-  tasks: Record<string, Task>; // tasks mapped by ID
+  createdBy: string;
 }

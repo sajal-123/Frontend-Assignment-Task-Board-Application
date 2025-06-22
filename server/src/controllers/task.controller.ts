@@ -68,7 +68,7 @@ export const getAllBoards = asyncHandler(async (req: Request, res: Response) => 
       .json(new ApiResponse(401, null, "Unauthorized access"));
   }
 
-  const boards = await Board.find({ createdBy: userId });
+  const boards = await Board.find({});
 
   return res
     .status(200)
@@ -77,9 +77,11 @@ export const getAllBoards = asyncHandler(async (req: Request, res: Response) => 
 
 // CREATE COLUMN
 export const createColumn = asyncHandler(async (req: Request, res: Response) => {
-  const { boardId, title, description, order } = req.body;
-
-  if (!boardId || !title || order === undefined) {
+  const { boardId } = req.params;
+  const { title, description, order } = req.body;
+  console.log('Creating column with title:', req.body, 'for boardId:', boardId);
+  
+  if (!boardId || !title) {
     return res.status(400).json(
       new ApiResponse(400, null, "Board ID, title, and order are required")
     );
@@ -97,11 +99,11 @@ export const createColumn = asyncHandler(async (req: Request, res: Response) => 
     boardId,
     title,
     description,
-    order,
+    order: order || 0,
     createdAt: new Date(),
   });
 
-  res.status(201).json(new ApiResponse(201, column, "Column created successfully"));
+  res.status(201).json(new ApiResponse(201, {...column,tasks:[]}, "Column created successfully"));
 });
   
 // UPDATE COLUMN
@@ -148,11 +150,23 @@ export const getAllColumnsByBoard = asyncHandler(async (req: Request, res: Respo
       .json(new ApiResponse(400, null, "Board ID is required"));
   }
 
+  // Get all columns for the board
   const columns = await Column.find({ boardId }).sort({ order: 1 });
+
+  // For each column, get its tasks
+  const columnsWithTasks = await Promise.all(
+    columns.map(async (column) => {
+      const tasks = await Task.find({ columnId: column._id }).sort({ order: 1 });
+      return {
+        ...column.toObject(),
+        tasks,
+      };
+    })
+  );
 
   return res
     .status(200)
-    .json(new ApiResponse(200, columns, "Columns fetched successfully"));
+    .json(new ApiResponse(200, columnsWithTasks, "Columns with tasks fetched successfully"));
 });
 
 // CREATE TASK

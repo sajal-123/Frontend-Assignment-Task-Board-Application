@@ -3,16 +3,15 @@ import type { Application } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import morgan from 'morgan';
 
 import userRouter from "./routes/user.routes";
-import taskRouter from "./routes/Task.routes";
-import { ENV } from "./utils/ENV";
+import {BoardRoute,TaskRoute,ColumnRoute} from "./routes/Task.routes";
 
-// Load environment variables
 dotenv.config();
 
 const app: Application = express();
-
+app.use(morgan('dev'));
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -49,7 +48,9 @@ export const notifyClients = (data) => {
 
 // Routes
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/task", taskRouter);
+app.use("/api/v1/tasks", TaskRoute);
+app.use("/api/v1/columns", ColumnRoute);
+app.use("/api/v1/boards", BoardRoute);
 
 // Export app
 export { app };

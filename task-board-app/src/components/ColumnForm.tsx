@@ -1,29 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface ColumnFormProps {
-    onAdd: (title: string) => void;
+    onAdd: (title: string, description: string) => void;
     showForm: boolean;
     setShowForm: (showForm: boolean) => void;
 }
 
 const ColumnForm: React.FC<ColumnFormProps> = ({ onAdd, showForm, setShowForm }) => {
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const formRef = useRef<HTMLDivElement>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!title.trim()) return;
-        onAdd(title.trim());
+        onAdd(title.trim(), description.trim());
         setTitle('');
+        setDescription('');
         setShowForm(false);
     };
 
-    // Close on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (showForm && formRef.current && !formRef.current.contains(event.target as Node)) {
                 setShowForm(false);
                 setTitle('');
+                setDescription('');
             }
         };
 
@@ -44,13 +46,23 @@ const ColumnForm: React.FC<ColumnFormProps> = ({ onAdd, showForm, setShowForm })
                     placeholder="Column title"
                     className="input text-sm w-full mb-2"
                 />
+                <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Column description"
+                    className="input text-sm w-full mb-2 resize-none h-16"
+                />
                 <div className="flex gap-2">
                     <button type="submit" className="btn btn-primary px-3 py-1 text-xs">
                         Add
                     </button>
                     <button
                         type="button"
-                        onClick={() => setShowForm(false)}
+                        onClick={() => {
+                            setShowForm(false);
+                            setTitle('');
+                            setDescription('');
+                        }}
                         className="btn btn-secondary px-3 py-1 text-xs"
                     >
                         Cancel

@@ -6,6 +6,7 @@ import Auth from './pages/(auth)';
 import { useGetCurrentUser } from './hooks/user.queries';
 import { useEffect, useState } from 'react';
 import { useUserStore } from './store/user.store';
+import ProtectedRoute from './ProtectedRoute';
 
 const App = () => {
   const getUserMutation = useGetCurrentUser();
@@ -13,16 +14,14 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) return;
+    if (user) return setLoading(false);
 
     getUserMutation.mutate(undefined, {
       onSuccess: (data) => {
-        console.log('✅ Current user fetched successfully:', data);
         setUser(data.data);
         setLoading(false);
       },
-      onError: (error) => {
-        console.error('❌ Error fetching current user:', error);
+      onError: () => {
         clearUser();
         setLoading(false);
       },
@@ -34,7 +33,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/auth" element={user ? <Navigate to="/dashboard" /> : <Auth />} />
-      
+
       <Route
         path="/"
         element={<Navigate to={user ? "/dashboard" : "/auth?mode=login"} />}
@@ -43,18 +42,22 @@ const App = () => {
       <Route
         path="/dashboard"
         element={
-          <Layout>
-            <BoardView />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <BoardView />
+            </Layout>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/board/:id"
         element={
-          <Layout>
-            <BoardDetail />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <BoardDetail />
+            </Layout>
+          </ProtectedRoute>
         }
       />
     </Routes>

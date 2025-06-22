@@ -1,17 +1,17 @@
+// SortableColumnWrapper.tsx
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import React from 'react';
 
-const SortableColumnWrapper = ({
-  children,
-  id,
-}: {
+interface Props {
+  id: string;
   children: (props: {
     attributes: any;
     listeners: any;
   }) => React.ReactNode;
-  id: string;
-}) => {
+}
+
+const SortableColumnWrapper = ({ children, id }: Props) => {
   const { setNodeRef, attributes, listeners, transform, transition } = useSortable({ id });
 
   const style: React.CSSProperties = {
