@@ -1,8 +1,18 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { getCurrentUser, loginUser } from '../services/user.service';
+// src/hooks/user.queries.ts
+import { useMutation } from '@tanstack/react-query';
+import { getCurrentUser, loginUser, registerUser } from '../services/user.service';
 
 export const useGetCurrentUser = () =>
-  useQuery({ queryKey: ['currentUser'], queryFn: getCurrentUser });
+  useMutation({
+    mutationFn: getCurrentUser,
+  });
 
 export const useLoginUser = () =>
-  useMutation({ mutationFn: loginUser });
+  useMutation({
+    mutationFn: loginUser,
+  });
+
+export const useSignupUser = () =>
+  useMutation({
+    mutationFn: registerUser,
+  });

@@ -2,7 +2,6 @@ import mongoose, { Schema, Model } from "mongoose";
 import type { ITask } from "../@types/interface";
 
 
-
 const TaskSchema: Schema<ITask> = new Schema({
   columnId: { type: Schema.Types.ObjectId, ref: 'Column', required: true },
   title: { type: String, required: true },

@@ -1,14 +1,9 @@
+// src/store/user.store.ts
 import { create } from 'zustand';
 
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-}
-
 interface UserStore {
-  user: User | null;
-  setUser: (user: User) => void;
+  user: any | null;
+  setUser: (user: any) => void;
   clearUser: () => void;
 }
 

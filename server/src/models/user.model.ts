@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import type { IUser } from "../@types/interface";
+import { ENV } from "../utils/ENV";
 
 const userSchema: Schema<IUser> = new Schema(
   {
@@ -21,9 +22,8 @@ const userSchema: Schema<IUser> = new Schema(
       trim: true,
     },
     avatar: {
-      type: String, // Cloudinary URL
-      required: true,
-    },
+      type: String,
+        },
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -56,9 +56,9 @@ userSchema.methods.generateAccessToken = function (): string {
       email: this.email,
       username: this.username,
     },
-    process.env.ACCESS_TOKEN_SECRET as string,
+    ENV.ACCESS_TOKEN_SECRET as string,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      expiresIn: ENV.ACCESS_TOKEN_EXPIRY,
     }
   );
 };
@@ -68,9 +68,9 @@ userSchema.methods.generateRefreshToken = function (): string {
     {
       _id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET as string,
+    ENV.REFRESH_TOKEN_SECRET as string,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      expiresIn: ENV.REFRESH_TOKEN_EXPIRY,
     }
   );
 };

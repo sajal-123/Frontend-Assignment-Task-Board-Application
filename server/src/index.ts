@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { connectDB } from "./db/index";
 import { app } from "./app";
+import { ENV } from "./utils/ENV";
 
 // Load environment variables
 dotenv.config({
@@ -16,7 +17,7 @@ connectDB()
       throw error;
     });
 
-    const PORT = process.env.PORT || 8000;
+    const PORT = ENV.PORT || 8000;
 
     app.listen(PORT, () => {
       console.log(`Server is running at port: ${PORT}`);
