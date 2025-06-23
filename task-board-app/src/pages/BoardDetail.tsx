@@ -157,7 +157,7 @@ const BoardDetail: React.FC = () => {
             {/* DnD Columns */}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={columns.map((col) => col._id)} strategy={rectSortingStrategy}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4 item-start">
                         {columns.map((col) => (
                             <ColumnofTask key={col._id} col={col} setSelectedColumnId={setSelectedColumnId} />
                         ))}

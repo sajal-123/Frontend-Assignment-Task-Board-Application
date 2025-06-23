@@ -1,7 +1,7 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Task } from '../@types';
-import { Circle } from 'lucide-react';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Circle } from "lucide-react";
+import type { Task } from "../@types";
 
 interface Props {
   task: Task;
@@ -9,26 +9,37 @@ interface Props {
 
 const getPriorityStyle = (priority: string) => {
   switch (priority.toLowerCase()) {
-    case 'high':
+    case "high":
       return {
-        border: 'border-red-500',
-        dot: 'text-red-500',
-        badge: 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200',
+        border: "border-red-500",
+        dot: "text-red-500",
+        badge:
+          "bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200",
       };
-    case 'medium':
+    case "medium":
       return {
-        border: 'border-yellow-500',
-        dot: 'text-yellow-500',
-        badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200',
+        border: "border-yellow-500",
+        dot: "text-yellow-500",
+        badge:
+          "bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-200",
       };
-    case 'low':
+    case "low":
     default:
       return {
-        border: 'border-green-500',
-        dot: 'text-green-500',
-        badge: 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200',
+        border: "border-green-500",
+        dot: "text-green-500",
+        badge:
+          "bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200",
       };
   }
+};
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }); // e.g., June 27, 2025
 };
 
 const TaskCard: React.FC<Props> = ({ task }) => {
@@ -44,7 +55,6 @@ const TaskCard: React.FC<Props> = ({ task }) => {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
   const { border, dot, badge } = getPriorityStyle(task.priority);
 
   return (
@@ -53,25 +63,33 @@ const TaskCard: React.FC<Props> = ({ task }) => {
       {...attributes}
       {...listeners}
       style={style}
-      className={`p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing 
-                  bg-white/80 dark:bg-gray-800/70 backdrop-blur-sm border-l-4 ${border}`}
+      className={`rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing
+        bg-white/80 dark:bg-gray-800/70 backdrop-blur-sm border-l-4 ${border}
+        flex flex-col p-4 space-y-1`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-lg text-gray-800 dark:text-white">{task.title}</h3>
-        <Circle className={`w-4 h-4 mt-1 ${dot}`} fill="currentColor" />
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <h3 className="font-bold text-gray-800 dark:text-white text-base leading-snug flex-1">
+          {task.title}
+        </h3>
+        <Circle className={`w-4 h-4 ${dot}`} fill="currentColor" />
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{task.description}</p>
+      {/* Description */}
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        {task.description}
+      </p>
 
-      <div className="flex flex-wrap gap-2 text-xs">
+      {/* Badges */}
+      <div className="flex flex-wrap gap-2 text-xs font-medium">
         <span className={`px-2 py-0.5 rounded-full ${badge}`}>
           {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
         </span>
         <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-200">
-          Due: {task.dueDate}
+          📅 Due: {formatDate(task.dueDate)}
         </span>
         <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-200">
-          {task.assignedTo}
+          👤 {task.assignedTo}
         </span>
       </div>
     </div>

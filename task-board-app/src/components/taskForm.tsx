@@ -30,7 +30,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ columnId, onAdd, onClose }) => {
   useEffect(() => {
     if (users.length > 0) {
       // console.log('✅ Users fetched successfully:', users);
-      setAssignedTo(users[0].username);
+      setAssignedTo(users[0]._id);
     }
   }, [users]);
 

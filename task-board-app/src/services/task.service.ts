@@ -69,7 +69,7 @@ export const fetchTasks = async (columnId?: string) => {
 
 export const createTask = async (payload: Partial<Task>) => {
   console.log('Creating task with payload:', payload);
-  const { data } = await api.post(`/tasks${payload.columnId}`, payload);
+  const { data } = await api.post(`/tasks/${payload.columnId}`, payload);
   return data;
 };
 
