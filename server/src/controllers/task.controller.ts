@@ -171,8 +171,10 @@ export const getAllColumnsByBoard = asyncHandler(async (req: Request, res: Respo
 
 // CREATE TASK
 export const createTask = asyncHandler(async (req: Request, res: Response) => {
+  const { columnId } = req.params;
 
-  const { columnId, title, description, assignedTo, priority, dueDate, order } = req.body;
+  const { title, description, assignedTo, priority, dueDate, order } = req.body;
+  console.log('Creating task with params:', req.body, 'for columnId:', columnId);
 
   if (!columnId || !title || order === undefined) {
     return res.status(400).json(
@@ -192,7 +194,7 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
     title,
     description,
     createdBy: req.user?._id,
-    assignedTo,
+    assignedTo:assignedTo[0],
     priority,
     dueDate,
     order,

@@ -30,7 +30,7 @@ ColumnRoute.get("/:boardId", verifyJWT, getAllColumnsByBoard);            // GET
 
 // ==== TASK ROUTES ====
 
-TaskRoute.post("/", verifyJWT, createTask);                             // POST /tasks
+TaskRoute.post("/:columnId", verifyJWT, createTask);                             // POST /tasks
 TaskRoute.patch("/:taskId", verifyJWT, updateTask);                     // PATCH /tasks/:taskId
 
 // Exporting routes
