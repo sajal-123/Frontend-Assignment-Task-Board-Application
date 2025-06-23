@@ -2,6 +2,7 @@
 
 A full-stack task management application built with modern web technologies and a production-grade architecture. It allows users to manage tasks with features like authentication, smooth animations, and persistent storage.
 
+Demo Video: [https://drive.google.com/file/d/1xqKGk0ttLDReeZqTYqFe0Skbpc6uo_Kq/view?usp=sharing]
 ---
 
 ## 🚀 Tech Stack
